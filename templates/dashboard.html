@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | NEXUS Trading{% endblock %}
+
+{% block content %}
+    <div class="indices-bar">
+        <div class="index-card">
+            <div style="color: #888; font-size: 0.9em;">NIFTY 50</div>
+            <div class="index-val">22,450.95</div>
+            <div class="text-green" style="font-size: 0.9em;">▲ +108.70 (0.48%)</div>
+        </div>
+        <div class="index-card">
+            <div style="color: #888; font-size: 0.9em;">SENSEX</div>
+            <div class="index-val">73,985.59</div>
+            <div class="text-green" style="font-size: 0.9em;">▲ +333.60 (0.45%)</div>
+        </div>
+        <div class="index-card">
+            <div style="color: #888; font-size: 0.9em;">NIFTY BANK</div>
+            <div class="index-val">47,788.75</div>
+            <div class="text-red" style="font-size: 0.9em;">▼ -109.53 (0.22%)</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px;">
+        
+        <div class="card" style="flex: 2; height: 400px; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between;">
+                <h3 style="margin-top: 0; color: white;" id="chart-title">LIVE MARKET DATA <span class="text-green" style="font-size: 0.6em; margin-left: 10px;">● LIVE</span></h3>
+                <span style="color: #888; font-size: 0.8em;" id="chart-subtitle">Viewing NIFTY 50</span>
+            </div>
+            
+            <h1 style="margin: 5px 0 20px 0; color: white;" id="chart-price-display">₹22,450.95 <span class="text-green" style="font-size: 0.5em;">+0.48%</span></h1>
+            <div style="height: 280px;"><canvas id="marketChart"></canvas></div>
+        </div>
+
+        <div class="card" style="flex: 1; height: 400px; background-color: #0b0c10;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #2a2d3a; padding-bottom: 10px; margin-bottom: 20px;">
+                <div style="color: #888; font-size: 0.8em;">TERMINAL</div>
+                <div style="color: white; font-weight: bold;" id="term-display-price">₹0.00</div>
+            </div>
+            
+            <h2 style="color: white; margin-top: 0;" id="term-display-symbol">SELECT A STOCK</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" id="mode-buy-btn" onclick="setTradeMode('buy')" style="flex: 1; background: var(--accent-green); color: black; border: none; padding: 10px; font-weight: bold; border-radius: 5px; cursor: pointer;">BUY</button>
+                <button type="button" id="mode-sell-btn" onclick="setTradeMode('sell')" style="flex: 1; background: #15171e; color: white; border: 1px solid #333; padding: 10px; font-weight: bold; border-radius: 5px; cursor: pointer;">SELL</button>
+            </div>
+
+            <form id="trade-form" action="/buy" method="POST" onsubmit="alert('⚡ Order Executed Successfully! Redirecting to Portfolio...');">
+                <input type="hidden" name="symbol" id="input-symbol" value="">
+                <input type="hidden" name="name" id="input-name" value="">
+                <input type="hidden" name="price" id="input-price" value="0">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #888; font-size: 0.8em;">QUANTITY (SHARES)</label>
+                    <input type="number" name="quantity" id="input-qty" value="1" min="1" style="width: 100%; background: #15171e; border: 1px solid #333; color: white; padding: 10px; margin-top: 5px; border-radius: 5px; box-sizing: border-box;" oninput="updateTotal()">
+                </div>
+
+                <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
+                    <span style="color: #888; font-size: 0.9em;">TOTAL VALUE</span>
+                    <strong style="color: white;" id="term-total-cost">₹0.00</strong>
+                </div>
+                <div style="margin-bottom: 20px; display: flex; justify-content: space-between;">
+                    <span style="color: #888; font-size: 0.9em;">AVAILABLE BP</span>
+                    <strong style="color: var(--accent-green);">₹{{ "%.2f"|format(balance) }}</strong>
+                </div>
+
+                <button type="submit" class="buy-btn" style="width: 100%; padding: 15px; font-size: 1.1em;" id="execute-btn" disabled>EXECUTE BUY ⚡</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="color: white; margin-top: 0; margin-bottom: 20px;">Market Watch</h3>
+        <table class="list-table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th style="text-align: right;">Market Price</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>
+                        <strong style="font-size: 1.1em; color: white;">{{ stock.symbol }}</strong><br>
+                        <small style="color: #888;">{{ stock.name }}</small>
+                    </td>
+                    <td style="text-align: right; font-weight: bold; font-size: 1.1em; color: white;">
+                        ₹{{ stock.price }}
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="buy-btn" 
+                                data-symbol="{{ stock.symbol }}" 
+                                data-name="{{ stock.name }}" 
+                                data-price="{{ stock.price }}" 
+                                onclick="loadTerminal(this)" 
+                                style="background: var(--accent-green); color: black; border: none; font-weight: bold;">
+                            TRADE
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="color: white; margin-top: 0; margin-bottom: 20px;">📰 Latest Market News <span class="text-green" style="font-size: 0.6em; margin-left: 10px;">● LIVE</span></h3>
+        <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">
+            <div style="min-width: 280px; background: #0b0c10; padding: 15px; border-radius: 8px; border: 1px solid #2a2d3a;">
+                <small style="color: var(--accent-green);">The Economic Times • 10m ago</small>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 0.95em;">Tech sector rallies as TCS announces massive new AI initiatives.</p>
+            </div>
+            <div style="min-width: 280px; background: #0b0c10; padding: 15px; border-radius: 8px; border: 1px solid #2a2d3a;">
+                <small style="color: var(--accent-green);">MoneyControl • 25m ago</small>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 0.95em;">Reliance Industries continues upward trend amid strong Q3 expectations.</p>
+            </div>
+            <div style="min-width: 280px; background: #0b0c10; padding: 15px; border-radius: 8px; border: 1px solid #2a2d3a;">
+                <small style="color: var(--accent-green);">Mint • 1h ago</small>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 0.95em;">HDFC Bank stabilizes after morning dip, investors eye long-term gains.</p>
+            </div>
+            <div style="min-width: 280px; background: #0b0c10; padding: 15px; border-radius: 8px; border: 1px solid #2a2d3a;">
+                <small style="color: var(--accent-green);">LiveMint • 2h ago</small>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 0.95em;">Nifty 50 approaches all-time high as global markets show strong recovery.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. DYNAMIC CHART DATA
+        // These are fake trajectories so the chart changes shape for every stock!
+        const dynamicChartData = {
+            'NIFTY': [22300, 22350, 22320, 22400, 22380, 22420, 22410, 22460, 22430, 22450.95],
+            'RELIANCE': [2800, 2815, 2795, 2830, 2820, 2845, 2835, 2860, 2840, 2850.60],
+            'TCS': [3900, 3925, 3910, 3960, 3945, 3980, 3965, 3995, 3970, 3982.15],
+            'HDFCBANK': [1420, 1425, 1415, 1430, 1428, 1438, 1432, 1445, 1430, 1435.70],
+            'INFY': [1590, 1600, 1585, 1610, 1605, 1625, 1615, 1630, 1610, 1612.90],
+            'SBIN': [735, 740, 738, 745, 742, 752, 748, 755, 745, 748.20]
+        };
+
+        const labels = ['9:15', '10:00', '10:45', '11:30', '12:15', '13:00', '13:45', '14:30', '15:15', 'Now'];
+        
+        // Initialize the Chart
+        const ctx = document.getElementById('marketChart').getContext('2d');
+        let myChart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+                labels: labels, 
+                datasets: [{ 
+                    label: 'Market Price', 
+                    data: dynamicChartData['NIFTY'], 
+                    borderColor: '#00E676', 
+                    borderWidth: 3, 
+                    pointRadius: 0, 
+                    tension: 0.4 
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { grid: { display: false, color: '#2a2d3a' }, ticks: { color: '#888' } }, 
+                    y: { grid: { color: '#2a2d3a' }, ticks: { color: '#888' } } 
+                } 
+            }
+        });
+
+        // 2. TERMINAL LOGIC
+        let currentPrice = 0;
+        let currentMode = 'buy';
+
+        function loadTerminal(buttonElement) {
+            const symbol = buttonElement.getAttribute('data-symbol');
+            const name = buttonElement.getAttribute('data-name');
+            currentPrice = parseFloat(buttonElement.getAttribute('data-price'));
+            
+            // Update Terminal UI
+            document.getElementById('term-display-symbol').innerText = symbol;
+            document.getElementById('term-display-price').innerText = '₹' + currentPrice.toFixed(2);
+            document.getElementById('execute-btn').disabled = false;
+            
+            // Update Hidden Inputs
+            document.getElementById('input-symbol').value = symbol;
+            document.getElementById('input-name').value = name;
+            document.getElementById('input-price').value = currentPrice;
+            
+            // UPDATE THE CHART VISUALLY!
+            document.getElementById('chart-title').innerHTML = `${symbol} CHART <span class="text-green" style="font-size: 0.6em; margin-left: 10px;">● LIVE</span>`;
+            document.getElementById('chart-subtitle').innerText = `Viewing historical chart for ${name}`;
+            document.getElementById('chart-price-display').innerHTML = `₹${currentPrice.toFixed(2)} <span class="text-green" style="font-size: 0.5em;">Selected</span>`;
+            
+            // Feed new data to the chart and animate it
+            myChart.data.datasets[0].data = dynamicChartData[symbol];
+            myChart.update();
+
+            updateTotal();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateTotal() {
+            const qty = document.getElementById('input-qty').value;
+            const total = currentPrice * qty;
+            document.getElementById('term-total-cost').innerText = '₹' + total.toFixed(2);
+        }
+
+        function setTradeMode(mode) {
+            currentMode = mode;
+            const form = document.getElementById('trade-form');
+            const btn = document.getElementById('execute-btn');
+            const buyTab = document.getElementById('mode-buy-btn');
+            const sellTab = document.getElementById('mode-sell-btn');
+
+            if (mode === 'buy') {
+                form.action = '/buy';
+                btn.innerText = 'EXECUTE BUY ⚡';
+                btn.style.backgroundColor = 'var(--accent-green)';
+                btn.style.color = 'black';
+                
+                buyTab.style.backgroundColor = 'var(--accent-green)';
+                buyTab.style.color = 'black';
+                sellTab.style.backgroundColor = '#15171e';
+                sellTab.style.color = 'white';
+            } else {
+                form.action = '/sell';
+                btn.innerText = 'EXECUTE SELL ⚡';
+                btn.style.backgroundColor = '#ff5252'; 
+                btn.style.color = 'white';
+                
+                sellTab.style.backgroundColor = '#ff5252';
+                sellTab.style.color = 'white';
+                buyTab.style.backgroundColor = '#15171e';
+                buyTab.style.color = 'white';
+            }
+        }
+    </script>
+{% endblock %}

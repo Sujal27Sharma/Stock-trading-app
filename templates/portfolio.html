@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Your Portfolio | NEXUS Trading{% endblock %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: white; margin: 0;">My Portfolio</h2>
+        <div style="background: var(--card-bg); padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <span style="color: #888; font-size: 0.9em; margin-right: 10px;">Available Balance:</span>
+            <strong style="color: var(--accent-green); font-size: 1.2em;">₹{{ "%.2f"|format(balance) }}</strong>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if portfolio|length == 0 %}
+            <div style="text-align: center; padding: 50px; color: #777;">
+                <h2>Your portfolio is empty.</h2>
+                <p>Go back to the <a href="/dashboard" style="color: var(--accent-green); text-decoration: underline;">Dashboard</a> and execute a trade.</p>
+            </div>
+        {% else %}
+            <h3 style="color: white; margin-top: 0; margin-bottom: 20px;">Current Holdings</h3>
+            
+            <table class="list-table">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th style="text-align: right;">Avg. Cost</th>
+                        <th style="text-align: right;">Total Value (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in portfolio %}
+                    <tr>
+                        <td>
+                            <strong style="font-size: 1.1em; color: white;">{{ item.symbol }}</strong><br>
+                            <small style="color: #888;">{{ item.name }}</small>
+                        </td>
+                        <td style="text-align: right; color: white;">
+                            ₹{{ "%.2f"|format(item.price) }}
+                        </td>
+                        <td style="text-align: right; font-weight: bold; font-size: 1.1em; color: white;">
+                            ₹{{ "%.2f"|format(item.price * item.quantity) }}
+                            <br><small style="font-weight: normal; color: #888;">{{ item.quantity }} Shares</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endblock %}

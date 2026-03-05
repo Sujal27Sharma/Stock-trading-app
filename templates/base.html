@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NEXUS Trading{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --bg-color: #0d0e12; --card-bg: #15171e; --text-color: #e0e0e0; --accent-green: #00E676; --accent-red: #ff5252; --hover-color: #2a2d3a; --border-color: #2a2d3a; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        a { text-decoration: none; color: inherit; }
+        
+        .sidebar { width: 220px; background-color: #0b0c10; padding: 20px; display: flex; flex-direction: column; border-right: 1px solid var(--border-color); }
+        .logo { font-size: 1.5em; font-weight: bold; color: white; margin-bottom: 40px; display: flex; align-items: center; gap: 10px;}
+        .logo span { color: var(--accent-green); }
+        .nav-link { padding: 12px 15px; border-radius: 8px; margin-bottom: 5px; cursor: pointer; display: flex; align-items: center; transition: background 0.2s; color: #a0aab2;}
+        .nav-link:hover { background-color: var(--hover-color); color: white;}
+        .nav-link.active { background-color: rgba(0, 230, 118, 0.1); font-weight: bold; color: var(--accent-green); border-left: 3px solid var(--accent-green);}
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden;}
+        .top-bar { padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background-color: #0b0c10; border-bottom: 1px solid var(--border-color); }
+        .search-bar { width: 300px; padding: 10px 15px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; color: white; }
+        
+        .page-container { flex: 1; padding: 30px; overflow-y: auto; }
+        .card { background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 25px; margin-bottom: 20px; }
+        
+        .list-table { width: 100%; border-collapse: collapse; }
+        .list-table th, .list-table td { text-align: left; padding: 15px; border-bottom: 1px solid var(--border-color); }
+        .list-table th { color: #888; text-transform: uppercase; font-size: 0.85em; }
+        .buy-btn { background-color: var(--accent-green); color: black; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+        .buy-btn:hover { opacity: 0.8; }
+        
+        .indices-bar { display: flex; gap: 20px; margin-bottom: 20px; }
+        .index-card { background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); flex: 1; }
+        .index-val { font-size: 1.4em; font-weight: bold; color: white; margin-top: 5px;}
+        .text-green { color: var(--accent-green); }
+        .text-red { color: var(--accent-red); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo"><span>⬡</span> NEXUS</div>
+        <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="#" class="nav-link" onclick="alert('🔒 Markets module is locked in this Demo version.'); return false;">Markets</a>
+        <a href="/portfolio" class="nav-link {% if request.path == '/portfolio' %}active{% endif %}">Portfolio</a>
+        <a href="#" class="nav-link" onclick="alert('🔒 Alerts module is locked in this Demo version.'); return false;">Alerts</a>
+        <a href="#" class="nav-link" style="margin-top: auto;" onclick="alert('⚙️ Settings are disabled for guest users.'); return false;">Settings</a>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <input type="text" class="search-bar" placeholder="Search any NSE stock by name...">
+            <div style="font-size: 1.1em; color: white; display: flex; align-items: center; gap: 10px;">
+                <div style="width: 30px; height: 30px; background: #333; border-radius: 50%; display: inline-block;"></div>
+                Sujal Sharma ▼
+            </div>
+        </div>
+
+        <div class="page-container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
