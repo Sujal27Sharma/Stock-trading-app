@@ -19,3 +19,6 @@ To keep this repository organized, the documentation has been split into detaile
 5. Open your browser and navigate to `http://127.0.0.1:5000/`
 
 **Note:** You can use any dummy email and password on the login screen for local testing.
+🎥 Live Demo
+Watch the full application in action here:(https://drive.google.com/file/d/1ogpazbH-vxE3GDaD754Hu4nFyVmAZ4pN/view?usp=sharing
+)
